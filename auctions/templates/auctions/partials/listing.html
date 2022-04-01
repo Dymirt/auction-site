@@ -1,0 +1,12 @@
+<a href="{% url 'listing' listing.id %}" style="text-decoration: none; color: inherit">
+    <div style="border-style: solid; margin-bottom: 1rem; padding: 0.5rem; line-height: 0.5rem">
+        <h3>{{ listing.title }}</h3>
+        <p>{{ listing.description }}</p>
+        {% if listing.highest_bid %}
+            <p>{{ listing.highest_bid.bid }}$</p>
+        {% else %}
+            <p>{{ listing.starting_bid}}$</p>
+        {% endif %}
+        <p>Seller: {{ listing.user }}</p>
+    </div>
+</a>

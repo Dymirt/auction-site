@@ -1,0 +1,60 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div style="border-style: solid; margin-bottom: 1rem; padding: 1rem">
+        <h3>{{ listing.title }}</h3>
+        <p>{{ listing.description }}</p>
+        {% if highest_bid %}
+            <p>{{ highest_bid.bid }}</p>
+        {% else %}
+            <p>{{ listing.starting_bid }}</p>
+        {% endif %}
+        <p>Seller: {{ listing.user }}</p>
+        <p>Listing id: {{ listing.id }}</p>
+
+        {% if bids %}
+            <p>Highest bids: </p>
+            <div style='padding-left: 10px'>
+            {% for bid in bids %}
+                <p>{{bid.user}} {{bid.bid}}</p>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p>No bids yet.</p>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            {% if user != listing.user %}
+            <form action="{% url 'listing' listing.id %}" method='post'>
+                {% csrf_token %}
+                {% if highest_bid %}
+                <input type=number name='bid' min="{{ highest_bid.bid|add:1 }}" step="0.01">
+                {% else %}
+                <input type=number name='bid' min="{{ listing.starting_bid }}">
+                {% endif %}
+                <input type=submit value="Place Bid">
+            </form>
+        <form action='wishlist' method="post" >
+            {% csrf_token %}
+            <input value="{{ listing.id }}" name='listing_id' type="hidden" >
+            {% if wishlist %}
+            <input type=submit value="Remove from Wishlist">
+            {% else %}
+            <input type=submit value="Add to Wishlist">
+
+            {% endif %}
+        </form>
+        {% endif %}
+        {% endif %}
+            <form action="comment" method='post'>
+                {% csrf_token %}
+                <input type=hidden name='listing_id' value="{{ listing.id }}" >
+                <input type=text name='comment'>
+                <input type=submit value="Post comment">
+            </form>
+        {% for comment in listing.comments.all %}
+        <p>{{ comment.text }}</p>
+        {% endfor %}
+
+    </div>
+{% endblock %}
