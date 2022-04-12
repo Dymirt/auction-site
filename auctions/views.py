@@ -1,16 +1,24 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import User, Listing, Category, Bid, Comment
-from .forms import ListingForm
+from .models import User, Listing, Category, Comment
+from .forms import ListingForm, BidForm
+from django.views.generic.list import ListView
 
 
-def index(request):
-    listings = Listing.objects.all()
-    return render(request, "auctions/index.html", {'listings': listings})
+class ListingListView(ListView):
+    model = Listing
+    paginate_by = 10
+    template_name = "auctions/listings.html"
+    title = "Active Listings"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = self.title
+        return context
 
 
 def login_view(request):
@@ -68,15 +76,12 @@ def register(request):
 @login_required
 def add_auction(request):
     if request.method == "POST":
-        form = ListingForm(request.POST)
+        form = ListingForm(request.POST, request.FILES)
         if form.is_valid():
-            listing = Listing()
+            listing = form.save(commit=False)
             listing.user = request.user
-            listing.category = Category.objects.get(pk=form.data['category'])
-            listing.title = form.data['title']
-            listing.description = form.data['description']
-            listing.starting_bid = form.data['starting_bid']
             listing.save()
+
         return HttpResponseRedirect(reverse("index"))
 
     else:
@@ -85,24 +90,38 @@ def add_auction(request):
 
 
 def listing(request, listing_id):
-    listing = Listing.objects.get(pk=listing_id)
-    context = {'listing': listing}
 
-    if request.method == "POST":
-        bid_value = float(request.POST['bid'])
-        if listing.highest_bid():
-            if bid_value > listing.highest_bid().bid:
-                bid = Bid(user=request.user, auction=listing, bid=bid_value)
-                bid.save()
-                listing.bids.add(bid)
+    listing = Listing.objects.get(pk=listing_id)
+
+    form = BidForm(initial={'user': request.user.id, 'listing': listing})
 
     if listing.bids.all():
-        context['highest_bid'] = listing.highest_bid()
-        context['bids'] = listing.bids.all().order_by('-bid')[:3]
-    if request.user.is_authenticated:
-        if request.user.watchlist.filter(pk=listing_id):
-            context['wishlist'] = True
-    return render(request, "auctions/listing_view.html", context)
+        highest_bid = listing.highest_bid()
+        min_bid = highest_bid.bid + form.fields['bid'].widget.attrs['step']
+    else:
+        min_bid = listing.starting_bid
+
+    if request.method == "GET":
+
+        form.fields['bid'].widget.attrs['min'] = min_bid
+        context = {
+            'listing': listing,
+            'form': form
+        }
+
+        if request.user.is_authenticated:
+            if request.user.watchlist.filter(pk=listing_id):
+                context['wishlist'] = True
+        return render(request, "auctions/listing_view.html", context)
+
+    else:
+        form = BidForm(request.POST)
+        if form.is_valid():
+            bid = form.save(commit=False)
+            if bid.bid >= min_bid:
+                bid.save()
+                listing.bids.add(bid)
+                return HttpResponseRedirect(reverse('listing', kwargs={'listing_id': listing_id}))
 
 
 @login_required
@@ -115,12 +134,11 @@ def comment(request):
         comment.text = request.POST.get('comment')
         comment.save()
         listing.comments.add(comment)
-        print('Hello new comment')
         return HttpResponseRedirect(reverse('listing', kwargs={'listing_id': request.POST.get('listing_id')}))
 
 
-@login_required
 def wishlist(request):
+    title = "Wishlist"
 
     if request.method == "POST":
         listing = Listing.objects.get(pk=request.POST['listing_id'])
@@ -131,6 +149,53 @@ def wishlist(request):
             request.user.watchlist.remove(listing)
         return HttpResponseRedirect(reverse('listing', kwargs={'listing_id': request.POST['listing_id']}))
     else:
-        listings = request.user.watchlist.all()
-        return render(request, "auctions/wishlist.html", {'listings': listings})
+        listings = request.user.watchlist.all().filter(is_active=True)
+        return render(request, "auctions/listings.html", {
+            'object_list': listings,
+            'title': title
+        })
 
+
+class WishlistListView(ListingListView):
+    title = "Wishlist"
+
+    def get_queryset(self):
+        return self.request.user.watchlist.all()
+
+    def post(self, request):
+        listing = self.model.objects.get(pk=request.POST['listing_id'])
+        if listing not in request.user.watchlist.all():
+            request.user.watchlist.add(listing)
+        else:
+            request.user.watchlist.remove(listing)
+        return HttpResponseRedirect(reverse('listing', kwargs={'listing_id': request.POST['listing_id']}))
+
+
+def categories(request):
+    categories_list = Category.objects.all()
+    return render(request, "auctions/categories.html", {'categories': categories_list})
+
+
+def category_listings(request, category):
+    category = Category.objects.get(title=category)
+    listings = Listing.objects.all().filter(category=category, is_active=True)
+    return render(request, "auctions/listings.html", {
+        'object_list': listings,
+        'title': category
+    })
+
+
+class UserListingListView(ListingListView):
+    title = 'My listings'
+
+    def get_queryset(self):
+        return self.model.objects.all().filter(user=self.request.user)
+
+@login_required
+def close_listing(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+
+    if request.user == listing.user and request.method == "POST":
+        listing.is_active = False
+        listing.save()
+        return HttpResponseRedirect(reverse('listing', kwargs={'listing_id': listing_id}))

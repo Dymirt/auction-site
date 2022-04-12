@@ -1,9 +1,26 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<form action='add_listing' method='post'>
-    {% csrf_token %}
-    {{ form }}
-    <input type=submit>
-</form>
+
+<style>
+    label, input, textarea , select{
+    width: 100%;
+    }
+</style>
+
+<div class='container'>
+    <div class='row'>
+        <div class='col-6' style='margin: auto;'>
+            <form action='add_listing' method='post'>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type=submit>
+            </form>
+        </div>
+    </div>
+
+
+
+</div>
+
 {% endblock %}

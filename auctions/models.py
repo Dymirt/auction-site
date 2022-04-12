@@ -23,6 +23,10 @@ class Comment(models.Model):
     text = models.TextField()
 
 
+def image_path(instance, filename):
+    return 'listing_img/user_{0}//{1}'.format(instance.user.id, filename)
+
+
 class Listing(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
@@ -31,10 +35,8 @@ class Listing(models.Model):
     starting_bid = models.FloatField()
     bids = models.ManyToManyField(Bid, blank=True, related_name='bidders')
     comments = models.ManyToManyField(Comment, blank=True, related_name='commenters')
-    active = models.BooleanField(default=True)
-    winner = models.ForeignKey('User', on_delete=models.SET_NULL, null=True, blank=True, related_name='victories')
-    # TODO add photo field
-    # image = models.ImageField()
+    is_active = models.BooleanField(default=True)
+    image_url = models.URLField(blank=True, null=True)
 
     def highest_bid(self):
         if self.bids:
