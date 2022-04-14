@@ -13,7 +13,7 @@ urlpatterns = [
     path("wishlist", login_required(views.WishlistListView.as_view()), name="wishlist"),
     path("comment", views.comment, name="comment"),
     path('categories', views.categories, name='categories'),
-    path('<str:category>-category', views.category_listings, name='category'),
+    path('<str:category>-category', views.CategoryListingListView.as_view(), name='category'),
     path('mylistings', views.UserListingListView.as_view(), name='mylistings'),
     path('closelisting-<int:listing_id>', views.close_listing, name='closelisting')
 ]

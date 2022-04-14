@@ -1,0 +1,47 @@
+
+
+.listing {
+margin: 1rem 0;
+box-shadow: 2px 4px 8px silver;
+height: 10rem;
+}
+
+.listing img {
+width: 100%;
+height: 100%;
+object-fit:cover
+}
+
+.listing .description {
+overflow: hidden;
+text-overflow: ellipsis;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+}
+
+.price {
+font-weight: bold;
+text-align: center;
+
+}
+
+.bid {
+background-color: orange;
+}
+
+.sold {
+background-color: red;
+}
+
+.no_bid {
+background-color: green;
+}
+
+.listing_label {
+padding: .5rem;
+text-align: center;
+border-radius: .5rem;
+color: white;
+font-weight: bold;
+}

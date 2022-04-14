@@ -8,9 +8,13 @@
             <div class='col'>
                 <p style='background-color: red'>This auction is closed.</p>
             </div>
-                {% if highest_bid.user == user %}
+                {% if listing.highest_bid.user == user %}
                     <div class='col'>
                         <h3>You win this Auction!!! </h3>
+                    </div>
+                {% else %}
+                    <div class='col'>
+                        <h3> {{ listing.highest_bid.user }} win this auction!</h3>
                     </div>
                 {% endif %}
             {% endif %}
@@ -24,30 +28,23 @@
                 <h3>{{ listing.title }}</h3>
                 {% if listing.bids.all %}
                     <p> Highest bid: {{ listing.highest_bid.bid }}$</p>
+                    <p>Bids placed: {{ listing.bids.count }}</p>
                 {% else %}
-                    <p> Highest bid:{{ listing.starting_bid }}$</p>
+                    <p> Starting price: {{ listing.starting_bid }}$</p>
+                    <p>No bids yet.</p>
                 {% endif %}
                 {% if listing.is_active %}
-                    {% if listing.bids.all %}
-                        <p>Test: {{ listing.highest_bid.bid }}</p>
-                        <p> {{ listing.bids }}</p>
-                        <p>Bids placed: {{ bids.count }}</p>
-                    {% else %}
-                        <p>No bids yet.</p>
-                    {% endif %}
-
                     {% if user.is_authenticated %}
-
                         {% if listing.user != user %}
                             <form action="{% url 'listing' listing.id %}" method='post'>
                                 {% csrf_token %}
-                                {{ form }}
+                                {{ bid_form }}
                                 <input type=submit value="Place Bid">
                             </form>
                             <form action='wishlist' method="post" >
                             {% csrf_token %}
                             <input value="{{ listing.id }}" name='listing_id' type="hidden" >
-                                {% if listing in user.watchlist.all %}
+                                {% if user in listing.followers.all %}
                                     <input type=submit value="Remove from Wishlist">
                                 {% else %}
                                     <input type=submit value="Add to Wishlist">
@@ -59,9 +56,7 @@
                                     {% csrf_token %}
                                     <input type=submit value='Close auction'>
                                 </form>
-                {% else %}
-                    <h3> {{highest_bid.user }} win this auction!</h3>
-                {% endif %}
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
@@ -76,39 +71,19 @@
         </div>
 
         <div>
-            <h6>{{ listing.comments.all.count }} Comments</h6>
+            <h6>{{ listing.comments.count }} Comments</h6>
             {% for comment in listing.comments.all %}
-            {% include 'auctions/partials/comment.html' %}
+                {% include 'auctions/partials/comment.html' %}
             {% endfor %}
             {% if user.is_authenticated %}
             <div class="row justify-content-center">
                 <form action="comment" method='post'>
                     {% csrf_token %}
-                    <input type=hidden name='listing_id' value="{{ listing.id }}" >
-                    <textarea class='col'  name='comment'></textarea>
+                    {{ comment_form }}
                     <input class='col' type=submit value="Post comment">
                 </form>
-
             </div>
             {% endif %}
         </div>
-
-
-        {% if user.is_authenticated %}
-            {% if user == listing.user %}
-                {% if listing.is_active %}
-                    <form action="{% url 'closelisting' listing.id %}" method=post>
-                        {% csrf_token %}
-                        <input type=submit value='Close auction'>
-                    </form>
-                {% else %}
-                    <h3> {{highest_bid.user }} win this auction!</h3>
-                {% endif %}
-
-
-            {% else %}
-            {% endif %}
-        {% endif %}
-
     </div>
 {% endblock %}
