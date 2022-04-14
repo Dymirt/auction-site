@@ -1,4 +1,4 @@
-from django.forms import ModelForm, NumberInput, HiddenInput
+from django.forms import ModelForm, NumberInput, HiddenInput, TextInput, CharField
 
 from .models import Listing,  Bid, Comment
 
@@ -34,6 +34,7 @@ class CommentForm(ModelForm):
         model = Comment
         fields = ['user', 'listing', 'text']
         widgets = {
+            'text': TextInput(),
             'user': HiddenInput(),
             'listing': HiddenInput()
         }

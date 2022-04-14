@@ -1,0 +1,33 @@
+<div class='comments container'>
+    <h6>{{ listing.comments.count }} Comments</h6>
+    {% for comment in listing.comments.all %}
+        <div class='container comment'>
+            <div class="row ">
+                <div class='col'>
+                    <p class='username'>{{ comment.user }}</p>
+                </div>
+                <div class='col-3'>
+                    <p class='date'>
+                        <time  datetime="{{ comment.date }}">{{ comment.date }}</time>
+                    </p>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <p class='text'>{{ comment.text }}</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if user.is_authenticated %}
+    <div class='container'>
+        <form action="comment" method='post'>
+            {% csrf_token %}
+            {{ comment_form }}
+            <input type=submit value="Post comment">
+        </form>
+    </div>
+
+    {% endif %}
+</div>

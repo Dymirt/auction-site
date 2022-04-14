@@ -119,7 +119,7 @@ def listing(request, listing_id):
                 bid.save()
         return HttpResponseRedirect(reverse('listing', kwargs={'listing_id': listing_id}))
     else:
-        return render(request, "auctions/listing_view.html", context)
+        return render(request, "auctions/listing_detail.html", context)
 
 
 @login_required
