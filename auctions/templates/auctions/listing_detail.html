@@ -5,9 +5,9 @@
 
         <div class="row">
             {% if not listing.is_active %}
-            <div class='col'>
-                <p style='background-color: red'>This auction is closed.</p>
-            </div>
+                <div class='col'>
+                    <p style='background-color: red'>This auction is closed.</p>
+                </div>
                 {% if listing.highest_bid.user == user %}
                     <div class='col'>
                         <h3>You win this Auction!!! </h3>
@@ -25,46 +25,83 @@
                 <img style="width: 100%;" src='{{ listing.image_url }}'>
             </div>
             <div class='col'>
-                <h3>{{ listing.title }}</h3>
-                {% if listing.bids.all %}
-                    <p> Highest bid: {{ listing.highest_bid.bid }}$</p>
-                    <p>Bids placed: {{ listing.bids.count }}</p>
-                {% else %}
-                    <p> Starting price: {{ listing.starting_bid }}$</p>
-                    <p>No bids yet.</p>
-                {% endif %}
-                {% if listing.is_active %}
-                    {% if user.is_authenticated %}
-                        {% if listing.user != user %}
+                <div class='row'>
+                    <div class='col title'>
+                        <h3>{{ listing.title }}</h3>
+                    </div>
+                </div>
+                <div class='row price'>
+                    <div class='col'>
+                        {% if listing.bids.all %}
+                            <p>{{ listing.highest_bid.bid }}$</p>
+                        {% else %}
+                            <p>{{ listing.starting_bid }}$</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class='row'>
+                    <div class='col bid_info'>
+                        {% if listing.bids.all %}
+                            <p>{{ listing.bids.count }} bid(s) so far.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class='row'>
+                    <div class='col bid_info'>
+                        {% if listing.highest_bid.user == user %}
+                            <p>Your bid is the current bid</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class='row '>
+                    <div class='col bid_form'>
+                        {% if listing.is_active and listing.user != user and listing.highest_bid.user != user %}
                             <form action="{% url 'listing' listing.id %}" method='post'>
                                 {% csrf_token %}
                                 {{ bid_form }}
                                 <input type=submit value="Place Bid">
                             </form>
-                            <form action='wishlist' method="post" >
-                            {% csrf_token %}
-                            <input value="{{ listing.id }}" name='listing_id' type="hidden" >
-                                {% if user in listing.followers.all %}
-                                    <input type=submit value="Remove from Wishlist">
-                                {% else %}
-                                    <input type=submit value="Add to Wishlist">
-                                {% endif %}
-                            </form>
-                        {% else %}
-                            {% if listing.is_active %}
-                                <form action="{% url 'closelisting' listing.id %}" method=post>
-                                    {% csrf_token %}
-                                    <input type=submit value='Close auction'>
-                                </form>
-                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endif %}
-                <p> Description: {{ listing.description }}</p>
-                <p>Seller: {{ listing.user }}</p>
+                    </div>
+                </div>
+                <div class='row'>
+                    <div class='col wishlist'>
+                        {% if user.is_authenticated and listing.user != user and listing.is_active %}
+                             <form action='wishlist' method="post" >
+                                {% csrf_token %}
+                                <input value="{{ listing.id }}" name='listing_id' type="hidden" >
+                                    {% if user in listing.followers.all %}
+                                        <input type=submit value="Remove from Wishlist">
+                                    {% else %}
+                                        <input type=submit value="Add to Wishlist">
+                                    {% endif %}
+                             </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col'>
+                <p>Description</p>
+                <p>{{ listing.description }}</p>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col'>
                 <p>Category: <a href= "{% url 'category' listing.category %}">{{ listing.category }}</a></p>
                 <p>Listing id: {{ listing.id }}</p>
+                <p>Seller: {{ listing.user }}</p>
             </div>
+            <div class='col'>
+                {% if listing.user == user and listing.is_active %}
+                    <form action="{% url 'closelisting' listing.id %}" method=post>
+                        {% csrf_token %}
+                        <input type=submit value='Close auction'>
+                    </form>
+                {% endif %}
+            </div>
+
         </div>
         {% include 'auctions/partials/comments.html' %}
     </div>

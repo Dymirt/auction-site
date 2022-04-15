@@ -35,7 +35,7 @@
                     <div class='col'>
                         {% if listing.is_active %}
                             {% if listing.bids.all %}
-                                <p class="bid listing_label">Bids: {{ listing.bids.count }}</p>
+                                <p class="bid listing_label">{{ listing.bids.count }} bid(s) so far.</p>
                             {% else %}
                                 <p class="no_bid listing_label">No bids yet</p>
                             {% endif %}
