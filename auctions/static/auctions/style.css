@@ -4,9 +4,9 @@ box-shadow: 2px 4px 8px silver;
 height: 10rem;
 }
 
-.listing img {
+.listing img, .detail img {
 width: 100%;
-height: 100%;
+height: -webkit-fill-available;
 object-fit:cover
 }
 
@@ -62,4 +62,40 @@ text-align: right;
 .comment .text {
 padding: 0 1rem;
 font-style: italic;
+}
+
+
+.detail .description label{
+font-weight: bold;
+}
+.detail .description {
+margin-top: 1rem;
+}
+
+.detail {
+margin: auto;
+height: 68vh;
+}
+
+.other-detail{
+padding-top: 1rem
+}
+
+.listing_label div label {
+margin: 0;
+}
+.comment-form {
+padding: 1rem 0 ;
+}
+.comment-form label{
+display: None
+}
+
+.comment-form label{
+display: None
+}
+
+.comment-form #id_text{
+width:100%;
+height: 3rem;
 }

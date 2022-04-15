@@ -34,7 +34,6 @@ class CommentForm(ModelForm):
         model = Comment
         fields = ['user', 'listing', 'text']
         widgets = {
-            'text': TextInput(),
             'user': HiddenInput(),
             'listing': HiddenInput()
         }

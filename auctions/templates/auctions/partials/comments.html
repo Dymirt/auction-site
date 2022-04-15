@@ -21,12 +21,16 @@
     {% endfor %}
 
     {% if user.is_authenticated %}
-    <div class='container'>
-        <form action="comment" method='post'>
-            {% csrf_token %}
-            {{ comment_form }}
-            <input type=submit value="Post comment">
-        </form>
+    <div class='container comment-form'>
+        <div class='row'>
+            <div class='col'>
+                <form action="comment" method='post'>
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <input type=submit value="Post comment">
+                </form>
+            </div>
+        </div>
     </div>
 
     {% endif %}

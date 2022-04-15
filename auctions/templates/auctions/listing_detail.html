@@ -1,37 +1,37 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <div class='container'>
-
-        <div class="row">
+<div class='container'>
+    <div class="row justify-content-center">
             {% if not listing.is_active %}
-                <div class='col'>
-                    <p style='background-color: red'>This auction is closed.</p>
+                <div class='col-auto listing_label sold' style='margin: 1rem 0'>
+                    This auction is closed.
+                    {% if listing.highest_bid.user == user %}
+                        You win this Auction!!!
+                    {% else %}
+                        {% if listing.bids.all %}
+                            {{ listing.highest_bid.user }} win this auction!
+                        {% else %}
+                            There was no bids.
+                        {% endif %}
+                    {% endif %}
                 </div>
-                {% if listing.highest_bid.user == user %}
-                    <div class='col'>
-                        <h3>You win this Auction!!! </h3>
-                    </div>
-                {% else %}
-                    <div class='col'>
-                        <h3> {{ listing.highest_bid.user }} win this auction!</h3>
-                    </div>
-                {% endif %}
             {% endif %}
         </div>
-
-        <div class='row'>
-            <div class='col'>
-                <img style="width: 100%;" src='{{ listing.image_url }}'>
+</div>
+    <div class='container listing detail'>
+        <div class='row '>
+            <div class='col' style="height:inherit; padding: 0">
+                <img src='{{ listing.image_url }}'>
             </div>
-            <div class='col'>
-                <div class='row'>
-                    <div class='col title'>
+            <div class='col' style='padding: 1rem;'>
+                <div class='row justify-content-start'>
+                    <div class='col-auto title'>
                         <h3>{{ listing.title }}</h3>
                     </div>
                 </div>
                 <div class='row price'>
-                    <div class='col'>
+                    <div class='col-auto'>
                         {% if listing.bids.all %}
                             <p>{{ listing.highest_bid.bid }}$</p>
                         {% else %}
@@ -39,10 +39,20 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class='row'>
-                    <div class='col bid_info'>
+                <div class='row justify-content-start'>
+                    <div class='col-auto bid_info'>
                         {% if listing.bids.all %}
                             <p>{{ listing.bids.count }} bid(s) so far.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class='row'>
+                    <div class='col'>
+                        {% if listing.user == user and listing.is_active %}
+                            <form action="{% url 'closelisting' listing.id %}" method=post>
+                                {% csrf_token %}
+                                <input type=submit value='Close auction'>
+                            </form>
                         {% endif %}
                     </div>
                 </div>
@@ -79,30 +89,34 @@
                         {% endif %}
                     </div>
                 </div>
+                <div class='row description'>
+                    <div class='col'>
+                        <label>Description</label>
+                        <p>{{ listing.description }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class='row'>
-            <div class='col'>
-                <p>Description</p>
-                <p>{{ listing.description }}</p>
-            </div>
-        </div>
-        <div class='row'>
-            <div class='col'>
-                <p>Category: <a href= "{% url 'category' listing.category %}">{{ listing.category }}</a></p>
-                <p>Listing id: {{ listing.id }}</p>
-                <p>Seller: {{ listing.user }}</p>
-            </div>
-            <div class='col'>
-                {% if listing.user == user and listing.is_active %}
-                    <form action="{% url 'closelisting' listing.id %}" method=post>
-                        {% csrf_token %}
-                        <input type=submit value='Close auction'>
-                    </form>
-                {% endif %}
-            </div>
-
-        </div>
-        {% include 'auctions/partials/comments.html' %}
     </div>
+    <div class='container other-detail'>
+        <div class='row justify-content-end'>
+            <div class='col-auto'>
+                <table>
+                    <tr>
+                        <td>Category:</td>
+                        <td><a href= "{% url 'category' listing.category %}">{{ listing.category }}</a></td>
+                    </tr>
+                    <tr>
+                        <td>Listing id:</td>
+                        <td>{{ listing.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Seller:</td>
+                        <td>{{ listing.user }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% include 'auctions/partials/comments.html' %}
 {% endblock %}
