@@ -54,7 +54,7 @@ padding-top: 1rem;
 font-weight: bold;
 }
 
-.comment .date {
+.date {
 font-size: small;
 text-align: right;
 }
@@ -65,11 +65,13 @@ font-style: italic;
 }
 
 
-.detail .description label{
+.detail .description_full label{
 font-weight: bold;
 }
-.detail .description {
+
+.detail .description_full {
 margin-top: 1rem;
+
 }
 
 .detail {

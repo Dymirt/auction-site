@@ -46,6 +46,8 @@
                         {% endif %}
                     </div>
                 </div>
+
+                {% if user.is_authenticated %}
                 <div class='row'>
                     <div class='col'>
                         {% if listing.user == user and listing.is_active %}
@@ -76,7 +78,7 @@
                 </div>
                 <div class='row'>
                     <div class='col wishlist'>
-                        {% if user.is_authenticated and listing.user != user and listing.is_active %}
+                        {% if listing.user != user and listing.is_active %}
                              <form action='wishlist' method="post" >
                                 {% csrf_token %}
                                 <input value="{{ listing.id }}" name='listing_id' type="hidden" >
@@ -89,7 +91,9 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class='row description'>
+
+                {% endif %}
+                <div class='row description_full'>
                     <div class='col'>
                         <label>Description</label>
                         <p>{{ listing.description }}</p>

@@ -34,6 +34,7 @@ class Listing(models.Model):
     starting_bid = models.DecimalField(decimal_places=2, max_digits=10)
     is_active = models.BooleanField(default=True)
     image_url = models.URLField(blank=True, null=True)
+    date = models.DateTimeField(auto_now=True)
 
     def highest_bid(self):
         try:
